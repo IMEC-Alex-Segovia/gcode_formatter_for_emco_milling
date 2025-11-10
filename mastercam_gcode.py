@@ -1,5 +1,4 @@
 import re
-import math
 
 def skip_line_mastercam(line: str):
     upper_line = line.upper()
@@ -27,8 +26,6 @@ def emco_gcode_from_mastercam_gcode(mastercam_file: str, emco_file: str, S: int,
         output_file.write(f"N{sequence} {'G71' if units == 'mm' else 'G70'}\n")
         sequence += SEQUENCE_STEP
         output_file.write(f"N{sequence} M03 S{S}\n")
-        sequence += SEQUENCE_STEP
-        output_file.write(f"N{sequence} F{F}\n")
         sequence += SEQUENCE_STEP
         
         for line in input_file:

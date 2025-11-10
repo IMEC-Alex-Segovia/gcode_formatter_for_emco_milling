@@ -3,6 +3,7 @@ from tkinter import ttk, filedialog, messagebox
 import os
 from kirimoto_gcode import emco_gcode_from_kirimoto_gcode
 from mastercam_gcode import emco_gcode_from_mastercam_gcode
+from aspire_gcode import emco_gcode_from_aspire_gcode
 
 class MainForm:
     def __init__(self):
@@ -16,7 +17,7 @@ class MainForm:
         self.feed_rate = tk.StringVar(value="150")
         self.unit_system = tk.StringVar(value="mm")
         self.subprograms = tk.BooleanVar(value=False)
-        self.source_gcode = tk.StringVar(value="Fusion 360")
+        self.source_gcode = tk.StringVar(value="Mastercam")
         
         self.create_widgets()
     
@@ -82,7 +83,8 @@ class MainForm:
         
         source_combo = ttk.Combobox(main_frame, textvariable=self.source_gcode, 
                                    state="readonly", width=20)
-        source_combo['values'] = ('Fusion 360', 'Mastercam', 'Aspire', 'Kiri:Moto', 'Otro')
+        source_combo['values'] = ('Mastercam', 'Aspire', 'Kiri:Moto')
+        # ('Fusion 360', 'Mastercam', 'Aspire', 'Kiri:Moto', 'Otro')
         source_combo.grid(row=6, column=1, sticky=tk.W, pady=5)
         
         # Botón de formateo
@@ -104,7 +106,7 @@ class MainForm:
     
     def select_file(self):
         filetypes = (
-            ('Archivos GCode', '*.nc *.txt *.gcode *.cnc'),
+            ('Archivos GCode', '*.nc *.txt *.ngc'),
             ('Todos los archivos', '*.*')
         )
         
@@ -173,10 +175,11 @@ class MainForm:
 
             if (self.source_gcode.get() == "Kiri:Moto"):
                 emco_gcode_from_kirimoto_gcode(input_file, output_file, int(self.spindle_speed.get()), int(self.feed_rate.get()), self.unit_system.get())
-
-            if (self.source_gcode.get() == "Mastercam"):
+            elif (self.source_gcode.get() == "Mastercam"):
                 emco_gcode_from_mastercam_gcode(input_file, output_file, int(self.spindle_speed.get()), int(self.feed_rate.get()), self.unit_system.get())
-            
+            elif (self.source_gcode.get() == "Aspire"):
+                emco_gcode_from_aspire_gcode(input_file, output_file, int(self.spindle_speed.get()), int(self.feed_rate.get()), self.unit_system.get())
+
             self.add_info(f"Archivo formateado guardado como: {output_file}")
             self.add_info("Formateo completado exitosamente!")
             
