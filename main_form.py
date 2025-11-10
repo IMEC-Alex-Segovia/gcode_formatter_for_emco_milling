@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 import os
 from kirimoto_gcode import emco_gcode_from_kirimoto_gcode
+from mastercam_gcode import emco_gcode_from_mastercam_gcode
 
 class MainForm:
     def __init__(self):
@@ -11,8 +12,8 @@ class MainForm:
         
         # Variables
         self.file_path = tk.StringVar()
-        self.spindle_speed = tk.StringVar(value="1000")
-        self.feed_rate = tk.StringVar(value="100")
+        self.spindle_speed = tk.StringVar(value="1500")
+        self.feed_rate = tk.StringVar(value="150")
         self.unit_system = tk.StringVar(value="mm")
         self.subprograms = tk.BooleanVar(value=False)
         self.source_gcode = tk.StringVar(value="Fusion 360")
@@ -24,10 +25,18 @@ class MainForm:
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Configurar grid weights
+        # Configurar grid weights para expansión
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
+        
+        main_frame.columnconfigure(0, weight=0)  # Columna de etiquetas
+        main_frame.columnconfigure(1, weight=1)  # Columna de entrada/combos
+        main_frame.columnconfigure(2, weight=0)  # Columna de unidades
+        
+        # Configurar pesos de filas - la fila 9 (área de texto) se expande
+        for i in range(8):  # Filas 0-8 no se expanden
+            main_frame.rowconfigure(i, weight=0)
+        main_frame.rowconfigure(9, weight=1)  # Fila del área de texto se expande
         
         # Título
         title_label = ttk.Label(main_frame, text="Formateador de GCode para CNC Emco", 
@@ -46,11 +55,11 @@ class MainForm:
         
         # Velocidades
         ttk.Label(main_frame, text="Velocidad husillo (S):").grid(row=2, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(main_frame, textvariable=self.spindle_speed, width=15).grid(row=2, column=1, sticky=tk.W, pady=5)
+        ttk.Entry(main_frame, textvariable=self.spindle_speed, width=15).grid(row=2, column=1, sticky=(tk.W, tk.E), pady=5)
         ttk.Label(main_frame, text="RPM").grid(row=2, column=2, sticky=tk.W, pady=5)
         
         ttk.Label(main_frame, text="Velocidad avance (F):").grid(row=3, column=0, sticky=tk.W, pady=5)
-        ttk.Entry(main_frame, textvariable=self.feed_rate, width=15).grid(row=3, column=1, sticky=tk.W, pady=5)
+        ttk.Entry(main_frame, textvariable=self.feed_rate, width=15).grid(row=3, column=1, sticky=(tk.W, tk.E), pady=5)
         ttk.Label(main_frame, text="mm/min o in/min").grid(row=3, column=2, sticky=tk.W, pady=5)
         
         # Sistema de unidades
@@ -59,9 +68,9 @@ class MainForm:
         unit_frame = ttk.Frame(main_frame)
         unit_frame.grid(row=4, column=1, columnspan=2, sticky=tk.W, pady=5)
         
-        ttk.Radiobutton(unit_frame, text="Milímetros (G71)", 
+        ttk.Radiobutton(unit_frame, text="Milímetros (G21)", 
                        variable=self.unit_system, value="mm").grid(row=0, column=0, sticky=tk.W)
-        ttk.Radiobutton(unit_frame, text="Pulgadas (G70)", 
+        ttk.Radiobutton(unit_frame, text="Pulgadas (G20)", 
                        variable=self.unit_system, value="inches").grid(row=0, column=1, sticky=tk.W, padx=(20, 0))
         
         # Checkbox para subprogramas
@@ -78,7 +87,7 @@ class MainForm:
         
         # Botón de formateo
         ttk.Button(main_frame, text="Iniciar Formateo de GCode", 
-                  command=self.format_gcode, style="Accent.TButton").grid(row=7, column=0, columnspan=3, pady=20)
+                  command=self.format_gcode).grid(row=7, column=0, columnspan=3, pady=20)
         
         # Área de información
         info_label = ttk.Label(main_frame, text="Información del proceso:", 
@@ -86,7 +95,7 @@ class MainForm:
         info_label.grid(row=8, column=0, columnspan=3, sticky=tk.W, pady=(10, 5))
         
         self.info_text = tk.Text(main_frame, height=8, width=60, state=tk.DISABLED)
-        self.info_text.grid(row=9, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=5)
+        self.info_text.grid(row=9, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=5)
         
         # Barra de desplazamiento para el área de texto
         scrollbar = ttk.Scrollbar(main_frame, orient=tk.VERTICAL, command=self.info_text.yview)
@@ -164,6 +173,9 @@ class MainForm:
 
             if (self.source_gcode.get() == "Kiri:Moto"):
                 emco_gcode_from_kirimoto_gcode(input_file, output_file, int(self.spindle_speed.get()), int(self.feed_rate.get()), self.unit_system.get())
+
+            if (self.source_gcode.get() == "Mastercam"):
+                emco_gcode_from_mastercam_gcode(input_file, output_file, int(self.spindle_speed.get()), int(self.feed_rate.get()), self.unit_system.get())
             
             self.add_info(f"Archivo formateado guardado como: {output_file}")
             self.add_info("Formateo completado exitosamente!")
