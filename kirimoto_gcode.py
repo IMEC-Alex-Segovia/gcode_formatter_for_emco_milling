@@ -99,8 +99,14 @@ def emco_gcode_from_kirimoto_gcode(kiri_file: str, emco_file: str, S: int, F: in
 
             # Escribir solo si queda contenido
             if output_line.strip():
+                if "M6" in output_line:
+                    output_file.write(f"N{sequence} M05\n")
+                    sequence += SEQUENCE_STEP
                 output_file.write(f"N{sequence} {output_line}\n")
                 sequence += SEQUENCE_STEP
+                if "M6" in output_line:
+                    output_file.write(f"N{sequence} M03 S{S}\n")
+                    sequence += SEQUENCE_STEP
 
         # FINAL DEL PROGRAMA
         output_file.write(f"N{sequence} M05\n")

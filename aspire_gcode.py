@@ -116,6 +116,7 @@ def emco_gcode_from_aspire_gcode(mastercam_file: str, emco_file: str, S: int, F:
                 sequence += SEQUENCE_STEP
                 if tool_change_detected:
                     output_file.write(f"N{sequence} M03 S{S}\n") 
+                    sequence += SEQUENCE_STEP
 
         # FINAL DEL PROGRAMA
         output_file.write(f"N{sequence} M05\n")
