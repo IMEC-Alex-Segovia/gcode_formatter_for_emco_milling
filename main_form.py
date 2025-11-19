@@ -69,9 +69,9 @@ class MainForm:
         unit_frame = ttk.Frame(main_frame)
         unit_frame.grid(row=4, column=1, columnspan=2, sticky=tk.W, pady=5)
         
-        ttk.Radiobutton(unit_frame, text="Milímetros (G21)", 
+        ttk.Radiobutton(unit_frame, text="Milímetros (G71)", 
                        variable=self.unit_system, value="mm").grid(row=0, column=0, sticky=tk.W)
-        ttk.Radiobutton(unit_frame, text="Pulgadas (G20)", 
+        ttk.Radiobutton(unit_frame, text="Pulgadas (G70)", 
                        variable=self.unit_system, value="inches").grid(row=0, column=1, sticky=tk.W, padx=(20, 0))
         
         # Checkbox para subprogramas

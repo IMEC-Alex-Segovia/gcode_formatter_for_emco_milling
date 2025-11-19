@@ -15,12 +15,14 @@ def skip_line_aspire(line: str):
     
     return False
 
+def check_if_xyz(line: str):
+    return ("X" in line.upper()) or ("Y" in line.upper() or ("Z" in line.upper()))
 
 def emco_gcode_from_aspire_gcode(mastercam_file: str, emco_file: str, S: int, F: int, units: str):
     
     SEQUENCE_STEP = 10
     sequence = SEQUENCE_STEP
-    last_g_code = None  # Registro del último código G usado
+    #last_g_code = None  # Registro del último código G usado
 
     with open(mastercam_file, 'r') as input_file, open(emco_file, 'w') as output_file:
 
@@ -52,18 +54,21 @@ def emco_gcode_from_aspire_gcode(mastercam_file: str, emco_file: str, S: int, F:
             if skip_line_aspire(output_line):
                 continue
 
+            if "G0" in output_line and not check_if_xyz(output_line):
+                continue
+
             # LIMPIAR ESPACIOS MÚLTIPLES
             output_line = re.sub(r'\s+', ' ', output_line).strip()
 
             # --- DETECTAR CAMBIO DE HERRAMIENTA Y AGREGAR M05 ANTES ---
             tool_change_detected = False
-            tool_number = None
+            #tool_number = None
             
             # Detectar M6 T1, M6 T2, etc.
             m6_t_match = re.search(r'M6\s+T(\d+)', output_line, re.IGNORECASE)
             if m6_t_match:
                 tool_change_detected = True
-                tool_number = m6_t_match.group(1)
+                #tool_number = m6_t_match.group(1)
             
             # Si se detectó cambio de herramienta, agregar M05 antes
             if tool_change_detected:
@@ -109,6 +114,8 @@ def emco_gcode_from_aspire_gcode(mastercam_file: str, emco_file: str, S: int, F:
             if output_line.strip():
                 output_file.write(f"N{sequence} {output_line}\n")
                 sequence += SEQUENCE_STEP
+                if tool_change_detected:
+                    output_file.write(f"N{sequence} M03 S{S}\n") 
 
         # FINAL DEL PROGRAMA
         output_file.write(f"N{sequence} M05\n")
